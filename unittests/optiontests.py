@@ -25,6 +25,17 @@ def num_options(store: OptionStore) -> int:
 
 class OptionTests(unittest.TestCase):
 
+    def test_malformed_array_option(self):
+        for split_args in (False, True):
+            option = UserStringArrayOption('c_args', 'Compiler arguments', [], split_args=split_args)
+            for value in ('[-lol=lol]', '[', '[::1],127.0.0.1', '[undefined]'):
+                with self.subTest(value=value, split_args=split_args):
+                    with self.assertRaisesRegex(MesonException, 'error in option "c_args": malformed value'):
+                        option.set_value(value)
+                    self.assertEqual(option.value, [])
+            option.set_value("['-lol=lol']")
+            self.assertEqual(option.value, ['-lol=lol'])
+
     def test_basic(self):
         optstore = OptionStore(False)
         name = 'someoption'

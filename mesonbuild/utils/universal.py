@@ -1895,7 +1895,7 @@ def listify_array_value(value: object, shlex_split_args: bool = False) -> T.List
         if value.startswith('['):
             try:
                 newvalue = ast.literal_eval(value)
-            except ValueError:
+            except (ValueError, SyntaxError):
                 raise MesonException(f'malformed value {value}')
         elif value == '':
             newvalue = []
