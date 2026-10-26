@@ -392,7 +392,7 @@ def get_base_link_args(target: 'BuildTarget',
         # We consider that if there are no sanitizer arguments returned, then
         # the language doesn't support them.
         if sanitizer_args:
-            if not linker.has_multi_link_arguments(sanitizer_args, False)[0]:
+            if not linker.has_sanitizer_link_arguments(sanitizer_args, sanitizer)[0]:
                 raise MesonException(f'Linker {linker.name_string()} does not support sanitizer arguments {sanitizer_args}')
             args.extend(sanitizer_args)
     except KeyError:
@@ -907,6 +907,9 @@ class Compiler(HoldableObject, metaclass=SimpleABC):
             succeeded, and the second is whether it was retrieved from a cache
         """
         return self.linker.has_multi_arguments(args)
+
+    def has_sanitizer_link_arguments(self, args: T.List[str], sanitizers: T.List[str]) -> T.Tuple[bool, bool]:
+        return self.has_multi_link_arguments(args, False)
 
     def _get_compile_output(self, dirname: str, mode: CompileCheckMode) -> str:
         assert mode != CompileCheckMode.PREPROCESS, 'In pre-processor mode, the output is sent to stdout and discarded'

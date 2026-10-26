@@ -1360,6 +1360,24 @@ class CLikeCompiler(Compiler):
     def has_multi_link_arguments(self, args: T.List[str], to_host_args: bool = True) -> T.Tuple[bool, bool]:
         return self._has_multi_link_arguments(args, 'int main(void) { return 0; }\n')
 
+    def has_sanitizer_link_arguments(self, args: T.List[str], sanitizers: T.List[str]) -> T.Tuple[bool, bool]:
+        if 'fuzzer' in sanitizers:
+            # libFuzzer supplies main and requires this entry point instead.
+            code = '''
+                #include <stddef.h>
+                #include <stdint.h>
+                #ifdef __cplusplus
+                extern "C"
+                #endif
+                int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+                    (void)data;
+                    (void)size;
+                    return 0;
+                }
+            '''
+            return self._has_multi_link_arguments(args, code)
+        return super().has_sanitizer_link_arguments(args, sanitizers)
+
     @staticmethod
     def _concatenate_string_literals(s: str) -> str:
         pattern = re.compile(r'(?P<pre>.*([^\\]")|^")(?P<str1>([^\\"]|\\.)*)"\s+"(?P<str2>([^\\"]|\\.)*)(?P<post>".*)')

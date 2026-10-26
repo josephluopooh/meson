@@ -1131,6 +1131,16 @@ class LinuxlikeTests(BasePlatformTests):
         for i in compdb:
             self.assertIn("-fsanitize=address", i["command"])
 
+    @skip_if_not_base_option('b_sanitize')
+    def test_fuzzer_sanitizer(self):
+        testdir = os.path.join(self.unit_test_dir, '142 fuzzer sanitizer')
+        for sanitizer in ('fuzzer', 'address,fuzzer'):
+            with self.subTest(sanitizer=sanitizer):
+                self.wipe()
+                self.init(testdir, extra_args=[f'-Db_sanitize={sanitizer}'])
+                self.build()
+                self.run_tests()
+
     def test_cross_find_program(self):
         testdir = os.path.join(self.unit_test_dir, '11 cross prog')
         crossfile = tempfile.NamedTemporaryFile(mode='w', encoding='utf-8')
