@@ -21,7 +21,7 @@ from mesonbuild.programs import ExternalProgram
 
 
 from run_tests import (
-    get_fake_env
+    Backend, get_fake_env
 )
 
 from .baseplatformtests import BasePlatformTests
@@ -420,6 +420,17 @@ class FailureTests(BasePlatformTests):
             'python could not import modules: broken_module',
             override_envvars={'PYTHONPATH': self.srcdir})
         self.assertIn('AttributeError: module initialization failed', self.get_meson_log_raw())
+
+    def test_conflicting_custom_target_depfiles(self):
+        if self.backend is not Backend.ninja:
+            self.skipTest('Ninja backend test')
+        self.assertMesonRaises(
+            "python = find_program('python3')\n"
+            "foreach name : ['a', 'b']\n"
+            "  custom_target(name, output: name, depfile: 'dep.d',\n"
+            "                command: [python, '-c', 'pass'])\n"
+            "endforeach\n",
+            'Multiple producers for Ninja target "dep.d"')
 
     def test_compiler_cache_without_compiler(self):
         self.assertMesonRaises('',

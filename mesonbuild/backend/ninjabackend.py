@@ -452,7 +452,7 @@ class NinjaBuildElement:
         outfile.write('\n')
 
     def check_outputs(self) -> None:
-        for n in self.outfilenames:
+        for n in mesonlib.OrderedSet(self.outfilenames + self.elems.get('DEPFILE', [])):
             if n in self.all_outputs:
                 self.output_errors = f'Multiple producers for Ninja target "{n}". Please rename your targets.'
             self.all_outputs.add(n)
