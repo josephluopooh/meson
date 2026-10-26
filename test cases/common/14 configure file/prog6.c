@@ -4,14 +4,14 @@
 int main(void) {
     return strcmp(MESSAGE1, "foo")
         || strcmp(MESSAGE2, "@var1@")
-        || strcmp(MESSAGE3, "\\@var1@")
+        || strcmp(MESSAGE3, "\\foo")
         || strcmp(MESSAGE4, "\\@var1@")
         || strcmp(MESSAGE5, "\\@var1")
         || strcmp(MESSAGE6, "\\ @ \\@")
         || strcmp(MESSAGE7, "@var1")
-        || strcmp(MESSAGE8, "\\@var1bar")
+        || strcmp(MESSAGE8, "\\foovar2@")
         || strcmp(MESSAGE9, "foovar2@")
         || strcmp(MESSAGE10, "foovar2\\@")
         || strcmp(MESSAGE11, "foobarbazqux")
-        || strcmp(MESSAGE12, "foovar2\\@var3@var4\\@");
+        || strcmp(MESSAGE12, "foovar2\\bazvar4\\@");
 }

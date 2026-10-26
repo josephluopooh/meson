@@ -155,6 +155,23 @@ class AllPlatformTests(BasePlatformTests):
         self.assertEqual(conf_file('@VAR@\n@VAR@\n', confdata), 'foo\nfoo\n')
         self.assertEqual(conf_file('@VAR@\r\n@VAR@\r\n', confdata), 'foo\r\nfoo\r\n')
 
+    def test_do_conf_file_variables_after_backslashes(self):
+        confdata = ConfigurationData()
+        confdata.values = {'A': ('str_a', None), 'B': ('str_b', None)}
+        for count in (2, 4, 6):
+            with self.subTest(backslashes=count):
+                template = '@A@' + '\\' * count + '@B@'
+                result, missing, _ = do_conf_str('configuration_file', [template], confdata, 'meson')
+                self.assertEqual(result, ['str_a' + '\\' * (count // 2) + 'str_b'])
+                self.assertEqual(missing, set())
+
+        # A lone escape still protects Perl-style @variables, and matched
+        # escaped delimiters still produce literal @variable@ text.
+        for template, expected in [(r'\@A@', r'\@A@'), (r'\@A\@', '@A@'),
+                                   (r'\\\@A\@', r'\@A@')]:
+            result, _, _ = do_conf_str('configuration_file', [template], confdata, 'meson')
+            self.assertEqual(result, [expected])
+
     def test_do_conf_file_by_format(self):
         def conf_str(in_data, confdata, vformat):
             (result, missing_variables, confdata_useless) = do_conf_str('configuration_file', in_data, confdata, variable_format = vformat)
