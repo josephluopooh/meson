@@ -436,6 +436,8 @@ class InternalDependency(Dependency):
         return new_dep
 
 class ExternalDependency(Dependency):
+    is_partial = False
+
     def __init__(self, name: str, environment: 'Environment', kwargs: DependencyObjectKWs):
         Dependency.__init__(self, kwargs)
         self.env = environment
@@ -461,6 +463,7 @@ class ExternalDependency(Dependency):
                                includes: bool = False, sources: bool = False) -> Dependency:
         new = copy.copy(self)
         new._id = uuid.uuid4().int
+        new.is_partial = True
         if not compile_args:
             new.compile_args = []
         if not link_args:

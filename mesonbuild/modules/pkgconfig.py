@@ -228,7 +228,7 @@ class DependenciesHelper:
                 processed_reqs.append(self.metadata[obj.get_id()].filebase)
             elif isinstance(obj, dependencies.ExternalDependency) and obj.name == 'valgrind':
                 pass
-            elif isinstance(obj, PkgConfigDependency):
+            elif isinstance(obj, PkgConfigDependency) and not obj.is_partial:
                 if obj.found():
                     processed_reqs.append(obj.name)
                     self.add_version_reqs(obj.name, obj.version_reqs)

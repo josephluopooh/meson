@@ -1,0 +1,5 @@
+Name: full-dependency
+Description: Dependency with distinguishable compile and link flags
+Version: 1.0
+Libs: -lmeson_test_full_dependency
+Cflags: -DMESON_PARTIAL

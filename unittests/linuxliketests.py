@@ -292,6 +292,26 @@ class LinuxlikeTests(BasePlatformTests):
             content = f.read()
             self.assertNotIn('-lstat2', content)
 
+    @skipIfNoPkgconfig
+    def test_pkgconfig_partial_dependency(self):
+        testdir = os.path.join(self.unit_test_dir, '141 pkgconfig partial dependency')
+        self.init(testdir, override_envvars={'PKG_CONFIG_LIBDIR': testdir})
+        self.build()
+        env = {'PKG_CONFIG_LIBDIR': os.pathsep.join([self.privatedir, testdir])}
+        link_arg = '-lmeson_test_full_dependency'
+        for name in ('partial', 'partial-public'):
+            with self.subTest(name=name):
+                libs = self._run([PKG_CONFIG, '--static', '--libs', name], override_envvars=env).split()
+                self.assertNotIn(link_arg, libs)
+        cflags = self._run([PKG_CONFIG, '--cflags', 'partial-public'], override_envvars=env).split()
+        self.assertIn('-DMESON_PARTIAL', cflags)
+        libs = self._run([PKG_CONFIG, '--static', '--libs', 'partial-links'], override_envvars=env).split()
+        self.assertIn(link_arg, libs)
+        cflags = self._run([PKG_CONFIG, '--cflags', 'partial-links'], override_envvars=env).split()
+        self.assertNotIn('-DMESON_PARTIAL', cflags)
+        requires = self._run([PKG_CONFIG, '--print-requires', 'complete-dependency'], override_envvars=env)
+        self.assertIn('full-dependency', requires)
+
     def test_pkgconfig_fibonacci(self):
         testdir = os.path.join(self.unit_test_dir, '138 pkgconfig fibonacci')
         self.init(testdir)
