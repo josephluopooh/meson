@@ -391,7 +391,7 @@ class FailureTests(BasePlatformTests):
                                r"Problem encountered: a b \['c', \['d', {'e' : 'f'}\]\] g")
 
     def test_invalid_environment_variable_name(self):
-        for name in ('=', 'BAD=NAME', ''):
+        for name in ('=', 'BAD=NAME', '', '\0'):
             for method in ('set', 'append', 'prepend'):
                 with self.subTest(name=name, method=method):
                     self.wipe()
