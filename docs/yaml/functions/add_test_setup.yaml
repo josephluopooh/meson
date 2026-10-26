@@ -50,6 +50,8 @@ kwargs:
       Set whether this is the default test setup.
       If `true`, the setup will be used whenever `meson test` is run
       without the `--setup` option.
+      This option is ignored in subprojects, which must not override
+      the main project's default setup.
 
   exclude_suites:
     type: array[str]

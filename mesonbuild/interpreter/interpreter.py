@@ -3235,7 +3235,7 @@ class Interpreter(InterpreterBase, HoldableObject):
         if timeout_multiplier <= 0:
             FeatureNew('add_test_setup() timeout_multiplier <= 0', '0.57.0').use(self.subproject)
 
-        if kwargs['is_default']:
+        if kwargs['is_default'] and not self.subproject:
             if self.build.test_setup_default_name is not None:
                 raise InterpreterException(f'{self.build.test_setup_default_name!r} is already set as default. '
                                            'is_default can be set to true only once')

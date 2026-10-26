@@ -1,5 +1,7 @@
 project('testsetup default', 'c')
 
+subproject('before')
+
 envcheck = find_program('envcheck.py')
 
 # Defining ENV_A in test-env should overwrite ENV_A from test setup
@@ -21,3 +23,5 @@ env_3 = env_2
 env_3.set('ENV_A', '3')
 env_3.set('ENV_B', '3')
 add_test_setup('other', env: env_3)
+
+subproject('after')
