@@ -566,14 +566,15 @@ class PythonModule(ExtensionModule):
 
         want_modules = kwargs['modules']
         found_modules: T.List[str] = []
-        missing_modules: T.List[str] = []
+        failed_modules: T.List[str] = []
         if python.found() and want_modules:
             for mod in want_modules:
-                p, *_ = mesonlib.Popen_safe(
+                p, _, err = mesonlib.Popen_safe(
                     python.command +
                     ['-c', f'import {mod}'])
                 if p.returncode != 0:
-                    missing_modules.append(mod)
+                    failed_modules.append(mod)
+                    mlog.debug(f'Python module {mod!r} could not be imported:\n{err}')
                 else:
                     found_modules.append(mod)
 
@@ -581,7 +582,7 @@ class PythonModule(ExtensionModule):
         if want_modules:
             msg.append('({})'.format(', '.join(want_modules)))
         msg.append('found:')
-        if python.found() and not missing_modules:
+        if python.found() and not failed_modules:
             msg.extend([mlog.green('YES'), '({})'.format(' '.join(python.command))])
         else:
             msg.append(mlog.red('NO'))
@@ -595,9 +596,9 @@ class PythonModule(ExtensionModule):
             if required:
                 raise mesonlib.MesonException('{} not found'.format(name_or_path or 'python'))
             return NonExistingExternalProgram(python.name)
-        elif missing_modules:
+        elif failed_modules:
             if required:
-                raise mesonlib.MesonException('{} is missing modules: {}'.format(name_or_path or 'python', ', '.join(missing_modules)))
+                raise mesonlib.MesonException('{} could not import modules: {}'.format(name_or_path or 'python', ', '.join(failed_modules)))
             return NonExistingExternalProgram(python.name)
         else:
             assert isinstance(python, PythonExternalProgram), 'for mypy'

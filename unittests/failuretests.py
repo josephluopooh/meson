@@ -412,6 +412,15 @@ class FailureTests(BasePlatformTests):
             self.init(self.srcdir, inprocess=True,
                       override_envvars={'MESON_FORCE_BACKTRACE': '1'})
 
+    def test_python_module_import_failure(self):
+        with open(os.path.join(self.srcdir, 'broken_module.py'), 'w', encoding='utf-8') as f:
+            f.write("raise AttributeError('module initialization failed')\n")
+        self.assertMesonRaises(
+            "import('python').find_installation(modules: ['broken_module'])",
+            'python could not import modules: broken_module',
+            override_envvars={'PYTHONPATH': self.srcdir})
+        self.assertIn('AttributeError: module initialization failed', self.get_meson_log_raw())
+
     def test_compiler_cache_without_compiler(self):
         self.assertMesonRaises('',
                                'Compiler cache specified without compiler: ccache',
