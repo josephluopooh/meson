@@ -390,6 +390,20 @@ class FailureTests(BasePlatformTests):
         self.assertMesonRaises("error('a', 'b', ['c', ['d', {'e': 'f'}]], 'g')",
                                r"Problem encountered: a b \['c', \['d', {'e' : 'f'}\]\] g")
 
+    def test_invalid_environment_variable_name(self):
+        for name in ('=', 'BAD=NAME', ''):
+            for method in ('set', 'append', 'prepend'):
+                with self.subTest(name=name, method=method):
+                    self.wipe()
+                    self.assertMesonRaises(
+                        f"env = environment()\nenv.{method}('{name}', 'value')",
+                        'Invalid environment variable name:')
+            with self.subTest(name=name, method='constructor'):
+                self.wipe()
+                self.assertMesonRaises(
+                    f"environment({{'{name}': 'value'}})",
+                    'Invalid environment variable name:')
+
     def test_compiler_cache_without_compiler(self):
         self.assertMesonRaises('',
                                'Compiler cache specified without compiler: ccache',

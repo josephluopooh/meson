@@ -105,6 +105,7 @@ class EnvironmentVariables(HoldableObject):
             self.unset_vars.update(other.unset_vars)
 
     def set(self, name: str, values: T.List[str], separator: str = os.pathsep) -> None:
+        self._check_name(name)
         if name in self.unset_vars:
             raise MesonException(f'You cannot set the already unset variable {name!r}')
         self.varnames.add(name)
@@ -117,6 +118,7 @@ class EnvironmentVariables(HoldableObject):
         self.unset_vars.add(name)
 
     def append(self, name: str, values: T.List[str], separator: str = os.pathsep) -> None:
+        self._check_name(name)
         self.can_use_env = False
         if name in self.unset_vars:
             raise MesonException(f'You cannot append to unset variable {name!r}')
@@ -124,11 +126,17 @@ class EnvironmentVariables(HoldableObject):
         self.envvars.append((self._append, name, values, separator))
 
     def prepend(self, name: str, values: T.List[str], separator: str = os.pathsep) -> None:
+        self._check_name(name)
         self.can_use_env = False
         if name in self.unset_vars:
             raise MesonException(f'You cannot prepend to unset variable {name!r}')
         self.varnames.add(name)
         self.envvars.append((self._prepend, name, values, separator))
+
+    @staticmethod
+    def _check_name(name: str) -> None:
+        if not name or '=' in name or '\0' in name:
+            raise MesonException(f'Invalid environment variable name: {name!r}')
 
     @staticmethod
     def _set(env: T.Dict[str, str], name: str, values: T.List[str], separator: str, default_value: T.Optional[str]) -> str:
