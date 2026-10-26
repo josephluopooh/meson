@@ -404,6 +404,14 @@ class FailureTests(BasePlatformTests):
                     f"environment({{'{name}': 'value'}})",
                     'Invalid environment variable name:')
 
+    def test_hdf5_missing_compiler(self):
+        with open(self.mbuild, 'w', encoding='utf-8') as f:
+            f.write("project('hdf5 cpp only', 'cpp')\n"
+                    "dependency('hdf5', method: 'config-tool')\n")
+        with self.assertRaisesRegex(MesonException, 'Hdf5 requires a C compiler, but C is not in the list of project languages'):
+            self.init(self.srcdir, inprocess=True,
+                      override_envvars={'MESON_FORCE_BACKTRACE': '1'})
+
     def test_compiler_cache_without_compiler(self):
         self.assertMesonRaises('',
                                'Compiler cache specified without compiler: ccache',

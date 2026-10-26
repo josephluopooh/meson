@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 from ..mesonlib import OrderedSet, join_args
-from .base import DependencyCandidate, DependencyException, DependencyMethods
+from .base import DependencyCandidate, DependencyException, DependencyMethods, detect_compiler
 from .configtool import ConfigToolDependency
 from .detect import packages
 from .pkgconfig import PkgConfigDependency, PkgConfigInterface
@@ -105,7 +105,7 @@ class HDF5ConfigToolDependency(ConfigToolDependency):
         # linkers.
 
         for_machine = kwargs['native']
-        compiler = environment.coredata.compilers[for_machine][language]
+        compiler = detect_compiler(name, environment, for_machine, language)
         try:
             os.environ[f'HDF5_{cenv}'] = join_args(compiler.get_exelist())
             os.environ[f'HDF5_{lenv}LINKER'] = join_args(compiler.get_linker_exelist())
