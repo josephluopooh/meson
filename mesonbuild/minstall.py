@@ -622,13 +622,16 @@ class Installer:
 
     def do_strip(self, strip_bin: T.List[str], fname: str, outname: str, system: str) -> None:
         self.log(f'Stripping target {fname!r}.')
-        if system == 'darwin':
-            # macOS expects dynamic objects to be stripped with -x maximum.
-            # To also strip the debug info, -S must be added.
-            # See: https://www.unix.com/man-page/osx/1/strip/
-            returncode, stdo, stde = self.Popen_safe(strip_bin + ['-S', '-x', outname])
-        else:
-            returncode, stdo, stde = self.Popen_safe(strip_bin + [outname])
+        try:
+            if system == 'darwin':
+                # macOS expects dynamic objects to be stripped with -x maximum.
+                # To also strip the debug info, -S must be added.
+                # See: https://www.unix.com/man-page/osx/1/strip/
+                returncode, stdo, stde = self.Popen_safe(strip_bin + ['-S', '-x', outname])
+            else:
+                returncode, stdo, stde = self.Popen_safe(strip_bin + [outname])
+        except FileNotFoundError as e:
+            raise MesonException(f'Strip program {strip_bin[0]!r} not found') from e
         if returncode != 0:
             print('Could not strip file.\n')
             print(f'Stdout:\n{stdo}\n')

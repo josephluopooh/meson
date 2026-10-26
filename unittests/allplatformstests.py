@@ -123,6 +123,21 @@ class AllPlatformTests(BasePlatformTests):
     Tests that should run on all platforms
     '''
 
+    def test_install_missing_strip(self):
+        testdir = os.path.join(self.unit_test_dir, '103 strip')
+        with tempfile.TemporaryDirectory() as tmpdir:
+            native_file = Path(tmpdir) / 'native.ini'
+            native_file.write_text("[binaries]\nstrip = 'meson-test-nonexistent-strip'\n", encoding='utf-8')
+            self.init(testdir, extra_args=['--native-file', str(native_file)])
+            self.build()
+            # The strip tool is only needed when stripping is requested.
+            self.install()
+            with self.assertRaises(subprocess.CalledProcessError) as cm:
+                self._run(self.meson_command + ['install', '-C', self.builddir,
+                                               '--destdir', self.installdir, '--strip'])
+            self.assertIn("Strip program 'meson-test-nonexistent-strip' not found", cm.exception.output)
+            self.assertNotIn('Traceback', cm.exception.output)
+
     def test_default_options_prefix(self):
         '''
         Tests that setting a prefix in default_options in project() works.
