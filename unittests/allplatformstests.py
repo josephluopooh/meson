@@ -4245,6 +4245,18 @@ class AllPlatformTests(BasePlatformTests):
         )
         self.assertSetEqual(set(targets['app@exe']['depends']), compile_target_ids)
 
+    def test_introspect_extra_files_from_declared_dependency(self):
+        testdir = os.path.join(self.unit_test_dir, '142 extra files dependency')
+        self.init(testdir)
+
+        targets = self.introspect('--targets')
+        example = next(target for target in targets if target['name'] == 'example')
+        self.assertCountEqual(example['extra_files'], [
+            os.path.join(testdir, 'direct.txt'),
+            os.path.join(testdir, 'wrapper.txt'),
+            os.path.join(testdir, 'subprojects', 'foo', 'foo.txt'),
+        ])
+
     @skipIfNoExecutable('gettext')
     @skipIfNoExecutable('xgettext')
     def test_introspect_custom_target_subdir_source_path(self):

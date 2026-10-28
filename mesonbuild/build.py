@@ -1079,7 +1079,7 @@ class BuildTarget(Target, BuildTargetProto):
         # If the same source is defined multiple times, use it only once.
         self.seen_sources: T.Set[File] = set()
         self.generated: T.List['GeneratedTypes'] = []
-        self.extra_files: T.List[File] = []
+        self.extra_files: T.List[File] = kwargs.get('extra_files', []).copy()
         self.d_features: DFeatures = {
             'debug': kwargs.get('d_debug', []),
             'import_dirs': kwargs.get('d_import_dirs', []),
@@ -1136,7 +1136,6 @@ class BuildTarget(Target, BuildTargetProto):
         self.install_dir: T.List[T.Union[str, T.Literal[False]]] = [install_dir]
         self.install_mode = kwargs.get('install_mode', None)
         self.install_tag: T.List[T.Optional[str]] = kwargs.get('install_tag') or [None]
-        self.extra_files = kwargs.get('extra_files', [])
         self.install_rpath: str = kwargs.get('install_rpath', '')
         self.build_rpath = kwargs.get('build_rpath', '')
         self.resources = kwargs.get('resources', [])
