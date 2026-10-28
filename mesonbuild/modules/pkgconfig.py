@@ -527,9 +527,10 @@ class PkgConfigModule(NewExtensionModule):
         referenced_vars = set()
         optnames = [x.name for x in BUILTIN_DIR_OPTIONS.keys()]
 
-        if not dataonly:
+        if not dataonly or subdirs or deps.cflags:
             # includedir is always implied, although libdir may not be
-            # needed for header-only libraries
+            # needed for header-only libraries. Data-only packages can also
+            # export headers when subdirs or cflags are explicitly supplied.
             referenced_vars |= {'prefix', 'includedir'}
             if deps.pub_libs or deps.priv_libs:
                 referenced_vars |= {'libdir'}
@@ -674,7 +675,7 @@ class PkgConfigModule(NewExtensionModule):
                     else:
                         cflags.append('-I' + self._escape(PurePosixPath('${includedir}', d)))
             cflags += [self._escape(f) for f in deps.cflags]
-            if cflags and not dataonly:
+            if cflags:
                 ofile.write('Cflags: {}\n'.format(' '.join(cflags)))
 
             cflags_private: T.List[str] = [self._escape(f) for f in deps.cflags_private]
@@ -741,7 +742,7 @@ class PkgConfigModule(NewExtensionModule):
         dataonly = kwargs['dataonly']
         if dataonly:
             default_subdirs = []
-            blocked_vars = ['libraries', 'libraries_private', 'requires_private', 'extra_cflags', 'cflags_private', 'subdirs']
+            blocked_vars = ['libraries', 'libraries_private', 'requires_private', 'cflags_private']
             # Mypy can't figure out that this TypedDict index is correct, without repeating T.Literal for the entire list
             if any(kwargs[k] for k in blocked_vars):  # type: ignore
                 raise mesonlib.MesonException(f'Cannot combine dataonly with any of {blocked_vars}')
